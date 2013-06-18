@@ -302,14 +302,14 @@ int main( int argc, char **argv )
 	userInput.ti=60*3.1415926/180;
 	userInput.ts=60*3.1415926/180;
 	userInput.r=0.8;
-	userInput.a=0.1;
-	userInput.g=0.3;
+	userInput.a=0.9;
+	userInput.g=-0.3;
 	userInput.n=1.4;
 	glutInit( &argc, argv );
 	strcpy(quote[0],"theta i=60");
     strcpy(quote[1],"theta s=60");
     strcpy(quote[2],"r=0.8");
-    strcpy(quote[3],"a=0.99");
+    strcpy(quote[3],"a=0.9");
     strcpy(quote[4],"g=-0.3");
     strcpy(quote[5],"n=1.4");
     numberOfQuotes=6;
