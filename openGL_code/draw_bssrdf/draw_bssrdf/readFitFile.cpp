@@ -12,6 +12,7 @@
 #include<math.h>
 #include <complex>
 using namespace std;
+#define PI 3.14159
 
 float g_arr[12] = {-0.9,-0.7,-0.5,-0.3,0,0.3,0.5,0.7,0.9,0.95,0.99,-1};
 	float alph_arr[12] = {0.01,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99,-1}; //check no of entries;
@@ -920,9 +921,27 @@ void dhsv2rgb(double h, double s, double v,
         *b *= f;
 }
 
+
+
 float* equation8(FitData fd,float n1,int xdim, int  ydim){
 	//Ks*exp((-Ke*Mu) - Kc*Ki);
+	
+	// polar coordinate equations
+	//Wpeak has x , y , z directions.
+	// check if its normalized.
+	//else figure out the R value...assume its one. ?.. print out.
+	// calculate theta , phi from it . 
+	// project it using the spherical projection thingie.
 
+
+	//PROJECTION FORMULA ( spherical / disk)
+
+	// Xd = 2*theta0/pi * cos(phi0);
+	// Yd = 2*theta0/pi * sin (phi0);
+
+	// theta0 = arcos(wpeak.z/r); // z will  be from wpeak direction
+	// phi0 = arctan (wpeak.y/wpeak.x); // y and x will be from wpeakdirection
+	//r =  sqrt(wpeak.x^2 + wpeak.y^2 + wpeak.z^2)
 
 	float coord[]={1,0,0};
 	float scp[3];
@@ -931,6 +950,36 @@ float* equation8(FitData fd,float n1,int xdim, int  ydim){
 	float maga = 1;
 	float magb = sqrt(pow(scp[0],2)+pow(scp[1],2) +pow(scp[2],2));
 	float angle=acos(dotProduct(scp,coord)/maga*magb);
+	if(angle > PI)
+		angle = angle  - (PI/2.0);
+	else
+	angle = (PI/2.0) - angle;
+
+	//use the origin obtained to offset the origin ... 
+	//call it X0 , Y0;
+	float xout = fd.r*cos(fd.ts);
+	float yout = fd.r*sin(fd.ts);
+	//normalize wpeak
+	fd.maxdir.x = fd.maxdir.x/sqrt(pow(fd.maxdir.x,2) + pow(fd.maxdir.y,2) + pow(fd.maxdir.z,2));
+	fd.maxdir.y = fd.maxdir.y/sqrt(pow(fd.maxdir.x,2) + pow(fd.maxdir.y,2) + pow(fd.maxdir.z,2));
+	fd.maxdir.z = fd.maxdir.z/sqrt(pow(fd.maxdir.x,2) + pow(fd.maxdir.y,2) + pow(fd.maxdir.z,2));
+
+	float Xs = fd.maxdir.x + xout;
+	float Ys = fd.maxdir.y + yout;
+	float Zs = 0;
+
+	float rad  = sqrt(pow(fd.maxdir.x,2) + pow(fd.maxdir.y,2) + pow(fd.maxdir.z,2));
+	float theta0 = acos(fd.maxdir.z/rad);
+	float phi0 = atan2(fd.maxdir.y,fd.maxdir.x);
+	std::cout<<"value of Rad is "<<rad;
+
+
+	//project it back to the unit disk from spherical coords.
+	float X0 = 2*(theta0/PI)*cos(phi0);
+	float Y0 = 2*(theta0/PI)*sin(phi0);
+	//X0 = fd.maxdir.x;
+	//Y0 = fd.maxdir.y;
+
 	//printf("angle=%g\n",angle);
 //	int xdim = 200;
 //	int ydim =200;
@@ -942,6 +991,11 @@ float* equation8(FitData fd,float n1,int xdim, int  ydim){
 			float yd0 = (iy-ydim/2.0)/(ydim/2.0);
 			float xd = xd0;
 			float yd = yd0;
+			
+			xd = xd + X0;
+			yd = yd + Y0;
+			xd = xd*cos(angle)- yd*sin(angle);//-fd.maxdir.x;
+			yd = xd*sin(angle) + yd*cos(angle);//-fd.maxdir.y;
 
 		//	xd = xd*cos(angle)- yd*sin(angle);//-fd.maxdir.x;
 		//	yd = xd*sin(angle) + yd*cos(angle);//-fd.maxdir.y;
